@@ -5,8 +5,26 @@ const { checkProject } = require('./checker');
 const fs = require('node:fs');
 const path = require('node:path');
 
+const HELP_FLAGS = new Set(['--help', '-h']);
+
 function usage() {
   return 'Usage: node src/cli.js <project-path> [--json]';
+}
+
+function helpText() {
+  return [
+    usage(),
+    'Check whether a project is ready to build.',
+    '',
+    'Options:',
+    '  --json       Emit the report as machine-readable JSON.',
+    '  --help, -h   Show this help message.',
+    '',
+    'Examples:',
+    '  node src/cli.js --help',
+    '  node src/cli.js .',
+    '  node src/cli.js . --json',
+  ].join('\n');
 }
 
 function parseArguments(args) {
@@ -59,6 +77,11 @@ function isProjectDirectory(projectPath) {
 }
 
 function main(args = process.argv.slice(2)) {
+  if (args.some((argument) => HELP_FLAGS.has(argument))) {
+    process.stdout.write(`${helpText()}\n`);
+    return 0;
+  }
+
   let options;
   try {
     options = parseArguments(args);

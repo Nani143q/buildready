@@ -119,6 +119,27 @@ test('CLI emits JSON and uses exit status to report a passing project', () => {
   assert.equal(result.passed, true);
 });
 
+test('CLI prints help and exits successfully', () => {
+  for (const helpFlag of ['--help', '-h']) {
+    const run = spawnSync(process.execPath, [cliPath, helpFlag], {
+      cwd: projectRoot,
+      encoding: 'utf8',
+    });
+
+    assert.equal(run.error, undefined, run.error?.message);
+    assert.equal(run.status, 0, `${helpFlag}: ${run.stderr}`);
+    assert.equal(run.stderr, '');
+    assert.match(run.stdout, /Usage: node src\/cli\.js/);
+    assert.match(run.stdout, /^Check whether a project is ready to build\.$/m);
+    assert.match(run.stdout, /--json/);
+    assert.match(run.stdout, /--help, -h/);
+    assert.match(run.stdout, /Examples:/);
+    assert.match(run.stdout, /node src\/cli\.js --help/);
+    assert.match(run.stdout, /^  node src\/cli\.js \.$/m);
+    assert.match(run.stdout, /node src\/cli\.js \. --json/);
+  }
+});
+
 test('CLI returns a non-zero exit status for a failing project', () => {
   const run = spawnSync(process.execPath, [cliPath, missingFixture, '--json'], {
     cwd: projectRoot,
